@@ -1,0 +1,159 @@
+# -*- mode: yaml -*-
+manifest:
+  version: 1.0
+
+triggers:
+  on:
+    - pr_created
+    - commit
+    - pr_ready_for_review
+  include:
+    branch:
+      - quality-kit
+
+automations:
+ 
+  linearb_ai_description:
+    # trigger it only when PR is created or has new commits
+    on:
+      - pr_created
+      - commit
+    # skip description for Draft PRs and PRs from bots
+    if:
+      - {{ not pr.draft }}
+      - {{ pr.author | match(list=['github-actions', 'dependabot', '[bot]']) | nope }}
+    run:
+      - action: describe-changes@v1
+        args:
+          concat_mode: append
+
+  explain_code_experts:
+    if:
+      - true
+    run:
+      - action: explain-code-experts@v1 
+        args:
+          gt: 10
+
+  assign_code_experts:
+    if:
+      - true
+    run:
+      - action: add-reviewers@v1
+        args:
+          reviewers: {{ repo | codeExperts(gt=10) }}
+
+  linearb_ai_review:
+    if:
+      - true
+    run:
+      - action: code-review@v1
+
+  label_prs_without_tests:
+    if:
+      - {{ files | match(regex=r/[^a-zA-Z0-9](spec|test|tests)[^a-zA-Z0-9]/) | nope }}
+    run: 
+      - action: add-label@v1
+        args:
+          label: 'missing-tests'
+          color: {{ colors.red }}
+  
+  label_missing_jira_info:
+    if:
+      - {{ not (has.jira_ticket_in_title or has.jira_ticket_in_desc) }}
+    run:
+      - action: add-label@v1
+        args:
+          label: "missing-jira"
+          color: {{ colors.red }}
+      - action: add-comment@v1
+        args:
+          comment: |
+            This PR is missing a Jira ticket reference in the title or description.
+            Please add a Jira ticket reference to the title or description of this PR.
+
+  estimated_time_to_review:
+    if:
+      - true
+    run:
+      - action: add-label@v1
+        args:
+          label: "{{ calc.etr }} min review"
+          color: {{ colors.red if (calc.etr >= 20) else ( colors.yellow if (calc.etr >= 5) else colors.green ) }}
+
+  welcome_newcomer:
+    # If the PR author made their first contribution on the current day
+    if:
+      - true # trigger always for demo purposes
+      #- {{ repo.author_age < 1 and repo.age > 0 }}
+    # 1. Add reviewers from the team `my_organization/mentors`. Replace this string to match your organization
+    # 2. Apply a new-contributor label.
+    # 3 Post a comment that explains the next steps.
+    run:
+      - action: add-reviewers@v1
+        args:
+          reviewers: [linear-b/cghyzel]
+      - action: add-label@v1
+        args:
+          label: 'new-contributor'
+          color: '#FBBD10'
+      - action : add-comment@v1
+        args:
+          comment: |
+            Hello {{ pr.author }} 👋 Thanks for making your first PR, and welcome to our project!
+            Our mentor team has automatically been assigned to review this PR and guide you through the process.
+            Please reach out to that team if you have questions about the next steps.
+
+  review_todo_comments:
+      if:
+        - {{ source.diff.files | matchDiffLines(regex=r/^[+].*(TODO|todo|FIXME|fixme)/) | some }}
+      run:
+        - action: request-changes@v1
+          args:
+            comment: |
+              This PR contains a TODO statement. Please check to see if they should be removed.
+
+  review_sensitive_files:
+    # For all files listed in the sensitive custom expression.
+    if:
+      - {{ is.sensitive }}
+    run:
+      - action: add-reviewers@v1
+        args:
+          reviewers: [linear-b/app-sec]
+      - action: set-required-approvals@v1
+        args:
+          approvals: 2
+      - action: add-comment@v1
+        args:
+          comment: |
+            This PR affects one or more sensitive files and requires review from the security team.
+
+  code_experts:
+    if:
+      - true
+    run:
+      - action: explain-code-experts@v1
+        args:
+          gt: 10
+
+calc:
+  etr: {{ branch | estimatedReviewTime }}
+
+has:
+  jira_ticket_in_title: {{ pr.title | includes(regex=r/\b[A-Za-z]+-\d+\b/) }}
+  jira_ticket_in_desc: {{ pr.description | includes(regex=r/atlassian.net\/browse\/\w{1,}-\d{3,4}/) }}
+
+colors:
+  red: 'b60205'
+  yellow: 'fbca04'
+  green: '0e8a16'
+
+is:
+  sensitive: {{ files | match(list=sensitive_directories) | some }}
+
+sensitive_directories:
+  - frontend/
+  - services/auth-python/app/
+  - services/billing-csharp/Controllers/
+  - services/orders-java/src/main/java/
