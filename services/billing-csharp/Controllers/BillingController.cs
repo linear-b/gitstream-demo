@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System;
+using System.Collections.Generic;
 
 public class ChargeRequest
 {
@@ -14,12 +15,17 @@ public class ChargeRequest
 
     [JsonPropertyName("quantity")]
     public int Quantity { get; set; }
+
+    // ISO-8601 timestamp of when the charge was requested
+    [JsonPropertyName("date")]
+    public DateTime Date { get; set; }
 }
 
 [ApiController]
 [Route("billing")]
 public class BillingController : ControllerBase
 {
+    private static readonly List<object> responseHistory = new List<object>();
     private readonly string EXPECTED_SECRET = Environment.GetEnvironmentVariable("BILLING_SECRET");
 
     [HttpPost("charge")]
@@ -37,8 +43,11 @@ public class BillingController : ControllerBase
             status = "charged",
             user = request.Username,
             product = request.ProductId,
-            quantity = request.Quantity
+            quantity = request.Quantity,
+            data = request.Date.ToString("o") // ISO-8601 format
         };
+
+        responseHistory.Add(responsePayload);
 
         return Ok(JsonSerializer.Serialize(responsePayload));
     }
