@@ -3,6 +3,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System;
+using System.Collections.Generic;
+using System.IO;
 
 public class ChargeRequest
 {
@@ -14,6 +16,10 @@ public class ChargeRequest
 
     [JsonPropertyName("quantity")]
     public int Quantity { get; set; }
+
+    // ISO-8601 timestamp of when the charge was requested
+    [JsonPropertyName("date")]
+    public DateTime Date { get; set; }
 }
 
 [ApiController]
@@ -21,6 +27,7 @@ public class ChargeRequest
 public class BillingController : ControllerBase
 {
     private readonly string EXPECTED_SECRET = Environment.GetEnvironmentVariable("BILLING_SECRET");
+    private static readonly string StorageDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "BillingData");
 
     [HttpPost("charge")]
     public async Task<IActionResult> Charge([FromBody] ChargeRequest request)
@@ -37,9 +44,31 @@ public class BillingController : ControllerBase
             status = "charged",
             user = request.Username,
             product = request.ProductId,
-            quantity = request.Quantity
+            quantity = request.Quantity,
+            date = request.Date.ToString("o") // ISO-8601 format
         };
 
+        await QueueForBillingSystemAsync(request.Username, responsePayload);
+
         return Ok(JsonSerializer.Serialize(responsePayload));
+    }
+
+    private async Task QueueForBillingSystemAsync(string username, object payload)
+    {
+        Directory.CreateDirectory(StorageDirectory);
+        var filePath = Path.Combine(StorageDirectory, $"{username}.json");
+        List<object> payloads = new();
+
+        if (System.IO.File.Exists(filePath))
+        {
+            try
+            {
+                payloads = JsonSerializer.Deserialize<List<object>>(await System.IO.File.ReadAllTextAsync(filePath)) ?? new();
+            }
+            catch { }
+        }
+
+        payloads.Add(payload);
+        await System.IO.File.WriteAllTextAsync(filePath, JsonSerializer.Serialize(payloads, new JsonSerializerOptions { WriteIndented = true }));
     }
 }
