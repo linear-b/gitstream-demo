@@ -66,11 +66,20 @@ automations:
         args:
           label: "missing-jira"
           color: {{ colors.red }}
+
+  comments_for_all:
+    if:
+      - true
+    run:
       - action: add-comment@v1
         args:
           comment: |
-            This PR is missing a Jira ticket reference in the title or description.
-            Please add a Jira ticket reference to the title or description of this PR.
+            {{ calc.etr }} min review
+
+            The follow issues were detected:
+            {{ '- ⏳ JIRA ticket missing' if (not (has.jira_ticket_in_title or has.jira_ticket_in_desc)) else '' }}
+            {{ '- Missing tests' if (files | match(regex=r/[^a-zA-Z0-9](spec|test|tests)[^a-zA-Z0-9]/) | nope) else '' }}
+
 
   estimated_time_to_review:
     if:
