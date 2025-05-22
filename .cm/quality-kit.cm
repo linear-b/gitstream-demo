@@ -75,9 +75,6 @@ automations:
         args:
           comment: |
             {{ calc.etr }} min review
-            The follow issues were detected:
-            {{ '- ⏳ JIRA ticket missing' if (not (has.jira_ticket_in_title or has.jira_ticket_in_desc)) else '' }}
-            {{ '- Missing tests' if (files | match(regex=r/[^a-zA-Z0-9](spec|test|tests)[^a-zA-Z0-9]/) | nope) else '' }}
 
 
   estimated_time_to_review:
