@@ -83,12 +83,7 @@ automations:
      - action: add-comment@v1
         args:
           comment: |
-            {% if not (has.jira_ticket_in_title or has.jira_ticket_in_desc) %}
-            🚫 **Missing Jira Ticket**  
-            This PR is missing a Jira ticket reference in the title or description.  
-            Please add a Jira ticket in the format `ABC-12345` to ensure traceability.
-            {% endif %}
-
+            {{ not (has.jira_ticket_in_title or has.jira_ticket_in_desc) ? "🚫 *Missing Jira Ticket*: Please add a Jira ticket reference in the title or description." : "" }}
             ⏱️ **Estimated Review Time**: {{ calc.etr }} minutes
 
 
