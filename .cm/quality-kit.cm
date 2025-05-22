@@ -66,11 +66,6 @@ automations:
         args:
           label: "missing-jira"
           color: {{ colors.red }}
-      - action: add-comment@v1
-        args:
-          comment: |
-            This PR is missing a Jira ticket reference in the title or description.
-            Please add a Jira ticket reference to the title or description of this PR.
 
   estimated_time_to_review:
     if:
@@ -80,6 +75,22 @@ automations:
         args:
           label: "{{ calc.etr }} min review"
           color: {{ colors.red if (calc.etr >= 20) else ( colors.yellow if (calc.etr >= 5) else colors.green ) }}
+
+  comment_for_both:
+    if:
+      - true
+    run:
+     - action: add-comment@v1
+        args:
+          comment: |
+            {% if not (has.jira_ticket_in_title or has.jira_ticket_in_desc) %}
+            🚫 **Missing Jira Ticket**  
+            This PR is missing a Jira ticket reference in the title or description.  
+            Please add a Jira ticket in the format `ABC-12345` to ensure traceability.
+            {% endif %}
+
+            ⏱️ **Estimated Review Time**: {{ calc.etr }} minutes
+
 
   welcome_newcomer:
     # If the PR author made their first contribution on the current day
