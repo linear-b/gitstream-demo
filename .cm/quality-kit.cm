@@ -73,7 +73,10 @@ automations:
     run:
       - action: add-comment@v1
         args:
-          comment: "{{ calc.etr }} min review. The following issues were detected: {{ '- ⏳ JIRA ticket missing' if is.jira_missing else '' }}"
+          comment: |
+            {{ calc.etr }} min review. The following issues were detected: 
+            {{ '- ⏳ JIRA ticket missing' if is.jira_missing else '' }}
+            Thanks!
 
   estimated_time_to_review:
     if:
