@@ -76,8 +76,8 @@ automations:
           comment: |
             {{ calc.etr }} min review
             The follow issues were detected:
-            {{ jira_comment }}
-            {{ test_comment }}
+            {{ is.jira_missing ? "- ⏳ JIRA ticket missing" : "" }}
+            {{ is.test_missing ? "- ⏳ Tests missing" : "" }}
 
   estimated_time_to_review:
     if:
@@ -151,9 +151,6 @@ has:
   jira_ticket_in_title: {{ pr.title | includes(regex=r/\b[A-Za-z]+-\d+\b/) }}
   jira_ticket_in_desc: {{ pr.description | includes(regex=r/atlassian.net\/browse\/\w{1,}-\d{3,4}/) }}
 
-jira_comment: {{ '- ⏳ JIRA ticket missing' if (not (has.jira_ticket_in_title or has.jira_ticket_in_desc)) else '' }}
-test_comment: {{ '- Missing tests' if (files | match(regex=r/[^a-zA-Z0-9](spec|test|tests)[^a-zA-Z0-9]/) | nope) else '' }}
-
 colors:
   red: 'b60205'
   yellow: 'fbca04'
@@ -161,6 +158,9 @@ colors:
 
 is:
   sensitive: {{ files | match(list=sensitive_directories) | some }}
+  jira_missing: {{ not (has.jira_ticket_in_title or has.jira_ticket_in_desc) }}
+  test_missing: {{ files | match(regex=r/[^a-zA-Z0-9](spec|test|tests)[^a-zA-Z0-9]/) | nope }}
+
 
 sensitive_directories:
   - frontend/
