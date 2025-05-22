@@ -76,6 +76,7 @@ automations:
           comment: |
             {{ calc.etr }} min review. The following issues were detected: 
             {{ '- ⏳ JIRA ticket missing' if is.jira_missing else '' }}
+            {{ '- ⏳ Tests missing' if is.test_missing else '' }}
             Thanks!
 
   estimated_time_to_review:
