@@ -1,0 +1,84 @@
+# -*- mode: yaml -*-
+manifest:
+  version: 1.0
+
+triggers:
+  on:
+    - pr_created
+    - commit
+    - pr_ready_for_review
+  include:
+    branch:
+      - efficiency-kit
+
+automations:
+  linearb_ai_description:
+    # trigger it only when PR is created or has new commits
+    on:
+      - pr_created
+      - commit
+    # skip description for Draft PRs and PRs from bots
+    if:
+      - {{ not pr.draft }}
+      - {{ pr.author | match(list=['github-actions', 'dependabot', '[bot]']) | nope }}
+    run:
+      - action: describe-changes@v1
+        args:
+          concat_mode: append
+
+  label_unresolved_threads:  
+    if:  
+      - {{ pr.unresolved_threads }}
+    run:
+      - action: add-label@v1
+        args:
+          label: "{{ pr.unresolved_threads }} Unresolved Thread(s)"
+          color: {{ colors.yellow }}
+
+  explain_code_experts:
+    if:
+      - true
+    run:
+      - action: explain-code-experts@v1 
+        args:
+          gt: 10
+
+  assign_code_experts:
+    if:
+      - true
+    run:
+      - action: add-reviewers@v1
+        args:
+          reviewers: {{ repo | codeExperts(gt=10) }}
+
+  linearb_ai_review:
+    if:
+      - true
+    run:
+      - action: code-review@v1
+        args:
+          approve_on_LGTM: true
+
+  safe_changes:
+    # Triggered for any changes that only affect formatting, documentation, tests, or images
+    if:
+      - {{ is.formatting or is.docs or is.tests or is.image }}
+    # Apply a safe change label, approve the PR and explain why in a comment.
+    run:
+      - action: add-label@v1
+        args:
+          label: 'safe-change'
+      - action: approve@v1
+      - action: add-comment@v1
+        args:
+          comment: |
+            This PR is considered a safe change and has been automatically approved.
+
+is:
+  formatting: {{ source.diff.files | isFormattingChange }}
+  docs: {{ files | allDocs }}
+  tests: {{ files | allTests }}
+  image: {{ files | allImages }}
+
+colors:
+  yellow: 'fbca04'
