@@ -1,5 +1,6 @@
 package com.example.orders.controller;
 
+import java.time.Instant;
 import org.springframework.beans.factory.annotation.Value;
 import com.example.orders.model.OrderRequest;
 import org.json.JSONObject;
@@ -49,6 +50,7 @@ public class OrderController {
             String body = authResponse.getBody();
             return body.contains("username") ? body.split(":")[1].replaceAll("[\"{} ]", "") : null;
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -62,6 +64,7 @@ public class OrderController {
         payload.put("username", username);
         payload.put("productId", productId);
         payload.put("quantity", quantity);
+        payload.put("dats", Instant.now().toString());
 
         HttpEntity<String> entity = new HttpEntity<>(payload.toString(), headers);
         try {
@@ -69,6 +72,7 @@ public class OrderController {
                 billingServiceUrl + "/billing/charge", entity, String.class);
             return billingResponse.getStatusCode().is2xxSuccessful();
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }
