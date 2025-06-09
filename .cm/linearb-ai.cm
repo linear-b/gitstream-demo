@@ -1,0 +1,40 @@
+# -*- mode: yaml -*-
+
+manifest:
+  version: 1.0
+
+triggers:
+  on:
+    - pr_created
+    - commit
+    - pr_ready_for_review
+  exclude:
+    repository:
+      - linenv
+      - linenv-test
+      - gitstream-automation-demo
+
+automations:
+  linearb_ai_review:
+    if:
+      # don't run org-level linearb-ai
+      - false
+      # - {{ not pr.draft }}
+      # - {{ IS_NOT_A_BOT }}
+    run:
+      - action: code-review@v1
+        args:
+          approve_on_LGTM: true
+
+  linearb_ai_description:
+    if:
+      # don't run org-level linearb-ai
+      - false
+      # - {{ not pr.draft }}
+      # - {{ IS_NOT_A_BOT }}
+    run:
+      - action: describe-changes@v1
+        args:
+          concat_mode: append
+
+IS_NOT_A_BOT: {{ pr.author | match(list=['github-actions', 'dependabot', '[bot]']) | nope }}
