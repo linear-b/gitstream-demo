@@ -18,6 +18,12 @@ class OrderControllerTests {
             this.validToken = validToken;
             this.billingSuccess = billingSuccess;
             this.mockUser = mockUser;
+            org.h2.jdbcx.JdbcDataSource dataSource = new org.h2.jdbcx.JdbcDataSource();
+            dataSource.setURL("jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1");
+            dataSource.setUser("sa");
+            dataSource.setPassword("");
+            this.dataSource = dataSource;
+            super.init();
         }
 
         @Override
