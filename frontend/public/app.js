@@ -20,6 +20,7 @@ async function login() {
 async function placeOrder() {
   const productId = document.getElementById("product").value;
   const quantity = parseInt(document.getElementById("quantity").value);
+  const evan = " This is evan making silly changes"
 
   const res = await fetch("/api/orders", {
     method: "POST",
