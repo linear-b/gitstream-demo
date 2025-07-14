@@ -6,7 +6,6 @@ const AUTH_URL   = process.env.AUTH_URL   || "http://auth-python:8000";
 const ORDERS_URL = process.env.ORDERS_URL || "http://orders-java:8080";
 
 app.use(express.static("public"));
-app.use(express.json());
 
 app.post("/api/login", async (req, res) => {
   const response = await fetch(`${AUTH_URL}/auth/login`, {
