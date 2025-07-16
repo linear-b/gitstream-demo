@@ -22,7 +22,10 @@ public class Calculator {
     }
 
     public double divide(double a, double b) {
-        return a / b;  // TODO: handle divide by zero
+        if (b == 0) {
+            throw new IllegalArgumentException("Division by zero");
+        }
+        return a / b;
     }
 
     public static void main(String[] args) {
