@@ -10,7 +10,7 @@ async function login() {
     body: JSON.stringify({ username, password }),
   });
 
-  if (!res.ok) return document.getElementById("output").textContent = "Login failed.";
+  if (!res.ok) return document.getElementById("output").textContent = "Login failed!";
   token = (await res.json()).token;
   if (!token) return document.getElementById("output").textContent = "No token received.";
   document.getElementById("output").textContent = "Logged in!";
