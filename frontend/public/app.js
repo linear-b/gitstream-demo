@@ -11,7 +11,11 @@ async function login() {
   });
 
   if (!res.ok) return document.getElementById("output").textContent = "Login failed.";
-  token = (await res.json()).token;
+  try {
+    token = (await res.json()).token;
+  } catch (error) {
+    return document.getElementById("output").textContent = "Invalid response from server.";
+  }
   if (!token) return document.getElementById("output").textContent = "No token received.";
   document.getElementById("output").textContent = "Logged in!";
   document.getElementById("login-section").style.display = "none";
