@@ -3,18 +3,129 @@
 <head>
   <title>Demo Shop</title>
   <script defer src="app.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f6fb;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: #fff;
+      margin-top: 40px;
+      padding: 32px 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      min-width: 320px;
+    }
+    h1 {
+      margin-top: 0;
+      color: #2d3a4b;
+      font-size: 1.5rem;
+      border-bottom: 1px solid #e0e4ea;
+      padding-bottom: 8px;
+      margin-bottom: 18px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: #4a5568;
+      font-size: 0.97rem;
+    }
+    input {
+      width: 100%;
+      padding: 8px 10px;
+      margin-bottom: 16px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 1rem;
+      background: #f8fafc;
+      transition: border 0.2s;
+    }
+    input:focus {
+      border-color: #4f8cff;
+      outline: none;
+    }
+    button {
+      background: #4f8cff;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 18px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-right: 8px;
+      margin-bottom: 10px;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #2563eb;
+    }
+    #output {
+      background: #f1f5f9;
+      border-radius: 6px;
+      padding: 12px;
+      margin-top: 18px;
+      min-height: 40px;
+      font-size: 0.97rem;
+      color: #374151;
+      border: 1px solid #e2e8f0;
+      white-space: pre-wrap;
+    }
+    .section {
+      margin-bottom: 28px;
+    }
+    select {
+      width: 100%;
+      padding: 8px 10px;
+      margin-bottom: 16px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 1rem;
+      background: #f8fafc;
+      transition: border 0.2s;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
+
+    select:focus {
+      border-color: #4f8cff;
+      outline: none;
+    }
+  </style>
 </head>
 <body>
-  <h1>Login</h1>
-  <input id="username" placeholder="Username" />
-  <input id="password" type="password" />
-  <button onclick="login()">Login</button>
-
-  <h1>Order</h1>
-  <input id="product" placeholder="Product ID" />
-  <input id="quantity" type="number" value="1" />
-  <button onclick="placeOrder()">Place Order</button>
-
-  <pre id="output"></pre>
+  <div class="container">
+    <div class="section" id="login-section">
+      <h1>Login</h1>
+      <label for="username">Username</label>
+      <input id="username" placeholder="Username" />
+      <label for="password">Password</label>
+      <input id="password" type="password" placeholder="Password" />
+      <button onclick="login()">Login</button>
+    </div>
+    <div class="section">
+      <h1>Order</h1>
+      <label for="product">Product ID</label>
+      <select id="product" style="width: 100%; padding: 8px 10px; margin-bottom: 16px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 1rem; background: #f8fafc; transition: border 0.2s;">
+        <option value="" disabled selected>Select a product</option>
+        <option value="101">Wireless Headphones (101)</option>
+        <option value="102">Smart Fitness Watch (102)</option>
+        <option value="103">Bluetooth Speaker (103)</option>
+      </select>
+      <label for="quantity">Quantity</label>
+      <input id="quantity" type="number" value="1" min="1" />
+      <button onclick="placeOrder()">Place Order</button>
+    </div>
+    <div class="section">
+      <button onclick="getOrderHistory()">Order History</button>
+      <pre id="output"></pre>
+    </div>
+  </div>
 </body>
 </html>
