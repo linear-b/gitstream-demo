@@ -1,0 +1,37 @@
+# -*- mode: yaml -*-
+manifest:
+  version: 1.0
+
+triggers:
+  on:
+    - pr_created
+    - commit
+    - pr_ready_for_review
+  include:
+    branch:
+      - r/base-kit.*/
+
+automations:
+  linearb_ai_review:
+    if:
+      - {{ not pr.draft }}
+      - {{ IS_NOT_A_BOT }}
+    run:
+      - action: code-review@v1
+        args:
+          guidelines: |
+            - Focus finding on **scoping issues**.
+            - Highlight **critical issues** only (correctness/logic, performance, security, maintainability blockers).
+            - Skip nitpicks; ignore null-reference risks that are known to be validated earlier in this code path.
+            - Keep suggestions short and actionable.
+
+  linearb_ai_description:
+    if:
+      - {{ not pr.draft }}
+      - {{ IS_NOT_A_BOT }}
+    run:
+      - action: describe-changes@v1
+        args:
+          concat_mode: append
+
+IS_NOT_A_BOT: {{ pr.author | match(list=['github-actions', 'dependabot', '[bot]']) | nope }}

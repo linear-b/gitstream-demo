@@ -1,0 +1,38 @@
+# -*- mode: yaml -*-
+manifest:
+  version: 1.0
+
+triggers:
+  on:
+    - pr_created
+    - commit
+    - pr_ready_for_review
+  include:
+    branch:
+      - r/.*-es/
+
+automations:
+  linearb_ai_review:
+    if:
+      - {{ not pr.draft }}
+      - {{ IS_NOT_A_BOT }}
+    run:
+      - action: code-review@v1
+        args:
+          guidelines: |
+            - Use the Spanish language for all comments
+            - Keep the tone of your Spanish technical and precise
+
+  linearb_ai_description:
+    if:
+      - {{ not pr.draft }}
+      - {{ IS_NOT_A_BOT }}
+    run:
+      - action: describe-changes@v1
+        args:
+          concat_mode: append
+          guidelines: |
+            - Use the Spanish language for all comments
+            - Keep the tone of your Spanish technical and precise
+
+IS_NOT_A_BOT: {{ pr.author | match(list=['github-actions', 'dependabot', '[bot]']) | nope }}

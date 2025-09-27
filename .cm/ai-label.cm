@@ -1,0 +1,1451 @@
+# -*- mode: yaml -*-
+# This CM automation tracks AI tool adoption in your repository
+# Based on: https://linearb.helpdocs.io/article/n8q4ydqmkd-ai-insights
+#
+# Adoption Types:
+# - Rules File: AI tool configuration file added/modified
+# - Assistant (Co-author): AI tool contributed as co-author in commits
+# - Agentic PR: AI tool or bot created the PR (detected by PR author or branch name)
+# - Review: AI tool left review comments on the PR
+
+manifest:
+  version: 1.0
+
+# Custom expressions for AI tool detection
+config:
+  # Rule file patterns for each AI tool
+  has_aider_rules: {{ files | match(regex=r/(^|.*\/).aider.conf.yml$/) | some }}
+  has_amazonq_rules: {{ files | match(regex=r/^\.amazonq\/rules\/[^\/]+\.md$/) | some }}
+  has_augmentcode_rules: {{ files | match(regex=r/^\.augment\/rules\/[^\/]+\.md$/) | some }}
+  has_claude_rules: {{ files | match(regex=r/(^|.*\/)CLAUDE\.md$/) | some }}
+  has_cursor_rules: {{ files | match(regex=r/(^|.*\/)\.cursorrules$|^\.cursor\/rules\/[^\/]+\.md$/) | some }}
+  has_customtool_rules: {{ files | match(regex=r/(^|.*\/)\.customtool$|^\.custom\/rules\/[^\/]+\.rules$/) | some }}
+  has_firebase_rules: {{ files | match(regex=r/(^|.*\/).idx\/airules.md$/) | some }}
+  has_gemini_rules: {{ files | match(regex=r/(^|.*\/)GEMINI\.md$/) | some }}
+  has_github_copilot_rules: {{ files | match(regex=r/^\.github\/copilot-instructions\.md$|^\.github\/[^\/]+-instructions\.md$/) | some }}
+  has_goose_rules: {{ files | match(regex=r/(^|.*\/)\.goosehints$/) | some }}
+  has_jetbrains_junie_rules: {{ files | match(regex=r/^\.junie\/[^\/]+\.md$/) | some }}
+  has_kilocode_rules: {{ files | match(regex=r/^\.kilocode\/rules\/[^\/]+\.md$/) | some }}
+  has_kiro_rules: {{ files | match(regex=r/^\.kiro\/steering\/[^\/]+\.md$/) | some }}
+  has_openai_rules: {{ files | match(regex=r/(^|.*\/)AGENT\.md$|(^|.*\/)AGENTS\.md$/) | some }}
+  has_openhands_rules: {{ files | match(regex=r/^\.openhands\/microagents\/[^\/]+\.md$/) | some }}
+  has_warp_rules: {{ files | match(regex=r/(^|.*\/)WARP\.md$/) | some }}
+  has_windsurf_rules: {{ files | match(regex=r/(^|.*\/)\.windsurfrules$/) | some }}
+  has_zed_rules: {{ files | match(regex=r/(^|.*\/)\.rules$/) | some }}
+
+  # Co-author detection patterns (check commit messages)
+  has_aider_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Aa]ider/) | some }}
+  has_aikido_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Aa]ikido/) | some }}
+  has_amazonq_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Aa]mazon.*[Qq]/) | some }}
+  has_atlassian_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Cc]ode.*[Rr]eviewer/) | some }}
+  has_bito_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Bb]ito/) | some }}
+  has_claude_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Cc]laude/) | some }}
+  has_codeant_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Cc]odeant/) | some }}
+  has_codegen_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Cc]odegen/) | some }}
+  has_coderabbit_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Cc]ode[Rr]abbit/) | some }}
+  has_codota_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Cc]odota/) | some }}
+  has_cubic_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Cc]ubic/) | some }}
+  has_cursor_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Cc]ursor/) | some }}
+  has_devin_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Dd]evin/) | some }}
+  has_ellipsis_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Ee]llipsis/) | some }}
+  has_factory_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Ff]actory/) | some }}
+  has_fine_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Ff]ine/) | some }}
+  has_gemini_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Gg]emini/) | some }}
+  has_github_copilot_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Cc]opilot/) | some }}
+  has_gitlab_duo_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Gg]it[Ll]ab.*[Dd]uo/) | some }}
+  has_gitstream_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Gg]itstream/) | some }}
+  has_google_jules_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Gg]oogle.*[Jj]ules/) | some }}
+  has_graphite_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Gg]raphite/) | some }}
+  has_greptile_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Gg]reptile/) | some }}
+  has_jazzberry_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*([Pp]rophet|[Jj]azzberry)/) | some }}
+  has_jetbrains_junie_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Jj]et[Bb]rains.*[Jj]unie/) | some }}
+  has_korbit_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Kk]orbit/) | some }}
+  has_meticulous_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Mm]eticulous/) | some }}
+  has_openai_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*([Cc]odex|[Cc]hat[Gg][Pp][Tt])/) | some }}
+  has_opencode_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Oo]pencode/) | some }}
+  has_qodo_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*(pr.agent|[Qq]odo|[Cc]odium)/) | some }}
+  has_replit_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Rr]eplit/) | some }}
+  has_rovo_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Rr]ovo/) | some }}
+  has_sourcegraph_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Ss]ourcegraph/) | some }}
+  has_sourcery_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Ss]ourcery/) | some }}
+  has_sweep_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Ss]weep/) | some }}
+  has_tabnine_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Tt]abnine/) | some }}
+  has_tusk_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Tt]usk/) | some }}
+  has_whatthediff_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Ww]hat.*[Dd]iff/) | some }}
+  has_windsurf_coauthor: {{ branch.commits.messages | match(regex=r/[Cc]o-[Aa]uthored-[Bb]y:.*[Ww]indsurf/) | some }}
+
+  # PR Author detection patterns
+  is_claude_author: {{ pr.author | match(regex=r/(^claude$|claude ai|claude ai assistant|claude code|claude github action|claude\[bot\])/) }}
+  is_coderabbit_author: {{ pr.author | match(regex=r/coderabbit/) }}
+  is_cursor_author: {{ pr.author | match(regex=r/(-cursor|^cursor)/) }}
+  is_devin_author: {{ pr.author | match(regex=r/(devin ai|devin-ai)/) }}
+  is_fine_author: {{ pr.author | match(regex=r/(^fine-agent|^fine-ai)/) }}
+  is_gemini_author: {{ pr.author | match(regex=r/(^gemini$|^gemini-|gemini-code-assist)/) }}
+  is_github_copilot_author: {{ pr.author | match(regex=r/copilot/) }}
+  is_gitstream_author: {{ pr.author | match(regex=r/gitstream/) }}
+  is_greptile_author: {{ pr.author | match(regex=r/greptile/) }}
+  is_qodo_author: {{ pr.author | match(regex=r/(^pr agent|^pr-agent|^pr_param|codium pr-agent|pr-ia-20240430|qodo\b|s-qce-pr-reviewer)/) }}
+
+  # PR Comment reviewer detection patterns (check who commented on the PR)
+  has_aider_reviewer: {{ pr.comments | map(attr='commenter') | match(regex=r/[Aa]ider/) | some }}
+  has_aikido_reviewer: {{ pr.comments | map(attr='commenter') | match(regex=r/[Aa]ikido/) | some }}
+  has_atlassian_reviewer: {{ pr.comments | map(attr='commenter') | match(regex=r/[Cc]ode.*[Rr]eviewer/) | some }}
+  has_bito_reviewer: {{ pr.comments | map(attr='commenter') | match(regex=r/[Bb]ito/) | some }}
+  has_claude_reviewer: {{ pr.comments | map(attr='commenter') | match(regex=r/[Cc]laude/) | some }}
+  has_codeant_reviewer: {{ pr.comments | map(attr='commenter') | match(regex=r/[Cc]odeant/) | some }}
+  has_coderabbit_reviewer: {{ pr.comments | map(attr='commenter') | match(regex=r/[Cc]ode[Rr]abbit/) | some }}
+  has_cursor_reviewer: {{ pr.comments | map(attr='commenter') | match(regex=r/[Cc]ursor/) | some }}
+  has_devin_reviewer: {{ pr.comments | map(attr='commenter') | match(regex=r/[Dd]evin/) | some }}
+  has_ellipsis_reviewer: {{ pr.comments | map(attr='commenter') | match(regex=r/[Ee]llipsis/) | some }}
+  has_fine_reviewer: {{ pr.comments | map(attr='commenter') | match(regex=r/[Ff]ine/) | some }}
+  has_gemini_reviewer: {{ pr.comments | map(attr='commenter') | match(regex=r/[Gg]emini/) | some }}
+  has_github_copilot_reviewer: {{ pr.comments | map(attr='commenter') | match(regex=r/[Cc]opilot/) | some }}
+  has_gitlab_duo_reviewer: {{ pr.comments | map(attr='commenter') | match(regex=r/[Gg]it[Ll]ab.*[Dd]uo/) | some }}
+  has_gitstream_reviewer: {{ pr.comments | map(attr='commenter') | match(regex=r/([Gg]itstream|[Ll]inear[Bb])/) | some }}
+  has_graphite_reviewer: {{ pr.comments | map(attr='commenter') | match(regex=r/[Gg]raphite/) | some }}
+  has_greptile_reviewer: {{ pr.comments | map(attr='commenter') | match(regex=r/[Gg]reptile/) | some }}
+  has_korbit_reviewer: {{ pr.comments | map(attr='commenter') | match(regex=r/[Kk]orbit/) | some }}
+  has_qodo_reviewer: {{ pr.comments | map(attr='commenter') | match(regex=r/(pr.agent|[Qq]odo|[Cc]odium)/) | some }}
+  has_sourcery_reviewer: {{ pr.comments | map(attr='commenter') | match(regex=r/[Ss]ourcery/) | some }}
+  has_sweep_reviewer: {{ pr.comments | map(attr='commenter') | match(regex=r/[Ss]weep/) | some }}
+  has_whatthediff_reviewer: {{ pr.comments | map(attr='commenter') | match(regex=r/[Ww]hat.*[Dd]iff/) | some }}
+  has_windsurf_reviewer: {{ pr.comments | map(attr='commenter') | match(regex=r/[Ww]indsurf/) | some }}
+
+  # Branch name detection patterns (check branch naming conventions used by AI tools)
+  has_openai_branch: {{ branch.name | match(regex=r/^codex\//) or (pr.labels | match(regex=r/^codex$/) | some) }}
+  has_github_copilot_branch: {{ branch.name | match(regex=r/^copilot\//) }}
+  has_jetbrains_junie_branch: {{ branch.name | match(regex=r/(^junie-|^jetbrains-junie-)/) }}
+  has_amazonq_branch: {{ branch.name | match(regex=r/^q\//) }}
+
+automations:
+  # =============================================================================
+  # RULES FILE ADOPTION - Label PRs that add/modify AI tool configuration files
+  # =============================================================================
+
+  label_aider_rules:
+    if:
+      - {{ config.has_aider_rules }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-aider'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-rules'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_amazonq_rules:
+    if:
+      - {{ config.has_amazonq_rules }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-amazon-q'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-rules'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_augmentcode_rules:
+    if:
+      - {{ config.has_augmentcode_rules }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-augmentcode'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-rules'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_claude_rules:
+    if:
+      - {{ config.has_claude_rules }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-claude'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-rules'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_cursor_rules:
+    if:
+      - {{ config.has_cursor_rules }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-cursor'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-rules'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_customtool_rules:
+    if:
+      - {{ config.has_customtool_rules }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-customtool'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-rules'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_firebase_rules:
+    if:
+      - {{ config.has_firebase_rules }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-firebase-studio'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-rules'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_gemini_rules:
+    if:
+      - {{ config.has_gemini_rules }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-gemini'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-rules'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_github_copilot_rules:
+    if:
+      - {{ config.has_github_copilot_rules }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-github-copilot'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-rules'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_goose_rules:
+    if:
+      - {{ config.has_goose_rules }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-goose'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-rules'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_jetbrains_junie_rules:
+    if:
+      - {{ config.has_jetbrains_junie_rules }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-jetbrains-junie'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-rules'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_kilocode_rules:
+    if:
+      - {{ config.has_kilocode_rules }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-kilocode'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-rules'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_kiro_rules:
+    if:
+      - {{ config.has_kiro_rules }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-kiro'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-rules'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_openai_rules:
+    if:
+      - {{ config.has_openai_rules }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-openai-codex'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-rules'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_openhands_rules:
+    if:
+      - {{ config.has_openhands_rules }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-openhands'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-rules'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_warp_rules:
+    if:
+      - {{ config.has_warp_rules }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-warp'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-rules'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_windsurf_rules:
+    if:
+      - {{ config.has_windsurf_rules }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-windsurf'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-rules'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_zed_rules:
+    if:
+      - {{ config.has_zed_rules }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-zed'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-rules'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  # =============================================================================
+  # CO-AUTHOR ADOPTION - Label PRs where AI tools contributed as co-authors
+  # =============================================================================
+
+  label_aider_coauthor:
+    if:
+      - {{ config.has_aider_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-aider'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_claude_coauthor:
+    if:
+      - {{ config.has_claude_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-claude'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_cursor_coauthor:
+    if:
+      - {{ config.has_cursor_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-cursor'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_github_copilot_coauthor:
+    if:
+      - {{ config.has_github_copilot_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-github-copilot'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_gemini_coauthor:
+    if:
+      - {{ config.has_gemini_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-gemini'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_qodo_coauthor:
+    if:
+      - {{ config.has_qodo_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-qodo'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_devin_coauthor:
+    if:
+      - {{ config.has_devin_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-devin'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_windsurf_coauthor:
+    if:
+      - {{ config.has_windsurf_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-windsurf'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_aikido_coauthor:
+    if:
+      - {{ config.has_aikido_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-aikido'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_amazonq_coauthor:
+    if:
+      - {{ config.has_amazonq_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-amazon-q'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_atlassian_coauthor:
+    if:
+      - {{ config.has_atlassian_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-atlassian-code-reviewer'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_bito_coauthor:
+    if:
+      - {{ config.has_bito_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-bito'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_codeant_coauthor:
+    if:
+      - {{ config.has_codeant_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-codeant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_codegen_coauthor:
+    if:
+      - {{ config.has_codegen_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-codegen'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_coderabbit_coauthor:
+    if:
+      - {{ config.has_coderabbit_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-coderabbit'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_codota_coauthor:
+    if:
+      - {{ config.has_codota_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-codota'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_cubic_coauthor:
+    if:
+      - {{ config.has_cubic_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-cubic'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_ellipsis_coauthor:
+    if:
+      - {{ config.has_ellipsis_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-ellipsis'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_factory_coauthor:
+    if:
+      - {{ config.has_factory_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-factory'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_fine_coauthor:
+    if:
+      - {{ config.has_fine_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-fine'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_gitlab_duo_coauthor:
+    if:
+      - {{ config.has_gitlab_duo_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-gitlab-duo'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_gitstream_coauthor:
+    if:
+      - {{ config.has_gitstream_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-gitstream'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_google_jules_coauthor:
+    if:
+      - {{ config.has_google_jules_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-google-jules'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_graphite_coauthor:
+    if:
+      - {{ config.has_graphite_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-graphite'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_greptile_coauthor:
+    if:
+      - {{ config.has_greptile_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-greptile'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_jazzberry_coauthor:
+    if:
+      - {{ config.has_jazzberry_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-jazzberry'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_jetbrains_junie_coauthor:
+    if:
+      - {{ config.has_jetbrains_junie_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-jetbrains-junie'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_korbit_coauthor:
+    if:
+      - {{ config.has_korbit_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-korbit'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_meticulous_coauthor:
+    if:
+      - {{ config.has_meticulous_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-meticulous'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_openai_coauthor:
+    if:
+      - {{ config.has_openai_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-openai-codex'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_opencode_coauthor:
+    if:
+      - {{ config.has_opencode_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-opencode'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_replit_coauthor:
+    if:
+      - {{ config.has_replit_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-replit'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_rovo_coauthor:
+    if:
+      - {{ config.has_rovo_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-rovo'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_sourcegraph_coauthor:
+    if:
+      - {{ config.has_sourcegraph_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-sourcegraph'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_sourcery_coauthor:
+    if:
+      - {{ config.has_sourcery_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-sourcery'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_sweep_coauthor:
+    if:
+      - {{ config.has_sweep_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-sweep'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_tabnine_coauthor:
+    if:
+      - {{ config.has_tabnine_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-tabnine'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_tusk_coauthor:
+    if:
+      - {{ config.has_tusk_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-tusk'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_whatthediff_coauthor:
+    if:
+      - {{ config.has_whatthediff_coauthor }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-what-the-diff'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-assistant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  # =============================================================================
+  # PR AUTHOR ADOPTION - Label PRs created by AI tools/bots
+  # =============================================================================
+
+  label_claude_author:
+    if:
+      - {{ config.is_claude_author }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-claude'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-agentic-pr'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_cursor_author:
+    if:
+      - {{ config.is_cursor_author }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-cursor'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-agentic-pr'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_github_copilot_author:
+    if:
+      - {{ config.is_github_copilot_author }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-github-copilot'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-agentic-pr'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_devin_author:
+    if:
+      - {{ config.is_devin_author }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-devin'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-agentic-pr'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_qodo_author:
+    if:
+      - {{ config.is_qodo_author }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-qodo'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-agentic-pr'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_coderabbit_author:
+    if:
+      - {{ config.is_coderabbit_author }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-coderabbit'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-agentic-pr'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_fine_author:
+    if:
+      - {{ config.is_fine_author }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-fine'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-agentic-pr'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_gemini_author:
+    if:
+      - {{ config.is_gemini_author }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-gemini'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-agentic-pr'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_gitstream_author:
+    if:
+      - {{ config.is_gitstream_author }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-gitstream'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-agentic-pr'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_greptile_author:
+    if:
+      - {{ config.is_greptile_author }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-greptile'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-agentic-pr'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_openai_branch:
+    if:
+      - {{ config.has_openai_branch }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-openai-codex'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-agentic-pr'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_github_copilot_branch:
+    if:
+      - {{ config.has_github_copilot_branch }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-github-copilot'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-agentic-pr'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_jetbrains_junie_branch:
+    if:
+      - {{ config.has_jetbrains_junie_branch }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-jetbrains-junie'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-agentic-pr'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_amazonq_branch:
+    if:
+      - {{ config.has_amazonq_branch }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-amazon-q'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-agentic-pr'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  # =============================================================================
+  # REVIEW COMMENTS - Label PRs where AI tools left review comments
+  # =============================================================================
+
+  label_aider_reviewer:
+    if:
+      - {{ config.has_aider_reviewer }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-aider'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-review'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_claude_reviewer:
+    if:
+      - {{ config.has_claude_reviewer }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-claude'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-review'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_coderabbit_reviewer:
+    if:
+      - {{ config.has_coderabbit_reviewer }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-coderabbit'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-review'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_cursor_reviewer:
+    if:
+      - {{ config.has_cursor_reviewer }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-cursor'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-review'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_gemini_reviewer:
+    if:
+      - {{ config.has_gemini_reviewer }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-gemini'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-review'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_github_copilot_reviewer:
+    if:
+      - {{ config.has_github_copilot_reviewer }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-github-copilot'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-review'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_qodo_reviewer:
+    if:
+      - {{ config.has_qodo_reviewer }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-qodo'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-review'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_sourcery_reviewer:
+    if:
+      - {{ config.has_sourcery_reviewer }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-sourcery'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-review'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_korbit_reviewer:
+    if:
+      - {{ config.has_korbit_reviewer }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-korbit'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-review'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_ellipsis_reviewer:
+    if:
+      - {{ config.has_ellipsis_reviewer }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-ellipsis'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-review'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_sweep_reviewer:
+    if:
+      - {{ config.has_sweep_reviewer }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-sweep'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-review'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_whatthediff_reviewer:
+    if:
+      - {{ config.has_whatthediff_reviewer }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-what-the-diff'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-review'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_aikido_reviewer:
+    if:
+      - {{ config.has_aikido_reviewer }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-aikido'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-review'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_atlassian_reviewer:
+    if:
+      - {{ config.has_atlassian_reviewer }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-atlassian-code-reviewer'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-review'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_bito_reviewer:
+    if:
+      - {{ config.has_bito_reviewer }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-bito'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-review'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_codeant_reviewer:
+    if:
+      - {{ config.has_codeant_reviewer }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-codeant'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-review'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_devin_reviewer:
+    if:
+      - {{ config.has_devin_reviewer }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-devin'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-review'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_fine_reviewer:
+    if:
+      - {{ config.has_fine_reviewer }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-fine'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-review'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_gitlab_duo_reviewer:
+    if:
+      - {{ config.has_gitlab_duo_reviewer }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-gitlab-duo'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-review'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_gitstream_reviewer:
+    if:
+      - {{ config.has_gitstream_reviewer }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-gitstream'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-review'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_graphite_reviewer:
+    if:
+      - {{ config.has_graphite_reviewer }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-graphite'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-review'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_greptile_reviewer:
+    if:
+      - {{ config.has_greptile_reviewer }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-greptile'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-review'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'
+
+  label_windsurf_reviewer:
+    if:
+      - {{ config.has_windsurf_reviewer }}
+    run:
+      - action: add-label@v1
+        args:
+          label: 'ai-tool-windsurf'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-adoption-review'
+      # - action: add-label@v1
+      #   args:
+      #     label: 'ai-used'

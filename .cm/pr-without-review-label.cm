@@ -1,0 +1,18 @@
+# -*- mode: yaml -*-
+manifest:
+  version: 1.0
+on:
+  - merge
+
+automations:
+  flag_merged_no_review:
+    if:
+      - {{ pr.approvals | length == 0 }}
+    run:
+      - action: add-label@v1
+        args:
+          label: "merged-without-review"
+          color: {{ colors.red }}
+
+colors:
+  red: 'F6443B'
