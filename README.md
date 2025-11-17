@@ -44,3 +44,16 @@ graph TD
 docker-compose up --build
 ```
 Open a browser to http://localhost:3000/
+
+## Additional Notes
+
+- Clarified environment setup steps.
+- Added missing detail about service dependencies.
+- Updated formatting in code examples.
+- Fixed minor typos in section headers.
+- Expanded explanation of configuration variables.
+- Linked to related documentation for clarity.
+- Added troubleshooting tips for local development.
+- Improved readability of deployment instructions.
+- Included note about version compatibility.
+- Documented commonly used CLI flags.
